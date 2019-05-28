@@ -3,6 +3,8 @@
 
 import math
 import operator
+import pysnooper
+import pickle
 
 def calcShannoEnt(dataSet):
     """计算香农熵
@@ -76,13 +78,14 @@ def majorityCnt(classList):
     return sortedClassCount[0][0]
 
 
+@pysnooper.snoop()
 def createTree(dataSet, labels):
     classList = [example[-1] for example in dataSet]
     if classList.count(classList[0]) == len(classList):
         return classList[0] #类别完全相同则停止划分
     if len(dataSet[0]) == 1:
         return majorityCnt(classList) # 遍历完所有特征返回出现次数最多的
-    bestFeat = chooseBestFeatureToSplit(dataSet)
+    bestFeat = chooseBestFeatureToSplit(dataSet) # 0
     bestFeatLabel = labels[bestFeat]
     myTree = {bestFeatLabel:{}}
     del(labels[bestFeat])
@@ -96,7 +99,34 @@ def createTree(dataSet, labels):
     return myTree
 
 
+def classify(inputTree, featLabels, testVec):
+    firstStr = list(inputTree.keys())[0]
+    secondDict = inputTree[firstStr]
+    # print(featLabels, firstStr)
+    featIndex= featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]) == dict:
+                classLabel = classify(secondDict[key], featLabels, testVec)
+            else:
+                classLabel = secondDict[key]
+    return classLabel
+
+
+def storeTree(inputTree, filename):
+    with open(filename, 'w') as f:
+        pickle.dump(inputTree, f)
+    
+def grabTree(filename):
+    with open(filename) as f:
+        Tree = pickle.load(f)
+    return Tree
+
+
 if __name__ == "__main__":
     myDat, labels = createDataset()
-    myTree = createTree(myDat, labels)
-    print(myTree)
+    copy_labels = labels[:]
+    myTree = createTree(myDat, copy_labels)
+    testVec1, testVec2 = [1, 0], [1, 1]
+    print(classify(myTree, labels, testVec1))
+    print(classify(myTree, labels, testVec2))
