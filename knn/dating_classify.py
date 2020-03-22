@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 
 import numpy as np 
 import operator
@@ -59,6 +59,7 @@ def datingClassTest():
     """测试分类器准确率"""
     hoRatio = 0.1
     datingDataMat, datingLabels = file2matrix('./datingTestSet2.txt')
+    #  show_scatter(datingDataMat, datingLabels)
     # print(datingDataMat)
     normMat, ranges, minVals = autoNorm(datingDataMat)
     m = normMat.shape[0]

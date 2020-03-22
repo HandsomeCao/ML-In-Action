@@ -1,8 +1,9 @@
-#coding: utf-8
+# coding: utf-8
 # 使用朴素贝叶斯进行文本分类
 
 import numpy as np
 import pysnooper
+
 
 def loadDataSet():
     postingList = [['my', 'dog', 'has', 'flea',
@@ -13,9 +14,9 @@ def loadDataSet():
                     'I', 'love', 'him'],
                    ['stop', 'posting', 'stupid', 'worthless',
                     'garbage'],
-                    ['mr', 'licks', 'ate', 'my', 'steak',
+                   ['mr', 'licks', 'ate', 'my', 'steak',
                     'how', 'to', 'stop', 'him'],
-                    ['quit', 'buying', 'worthless', 
+                   ['quit', 'buying', 'worthless',
                     'dog', 'food', 'stupid']]
     classVec = [0, 1, 0, 1, 0, 1]  # 1代表侮辱，0代表正常
     return postingList, classVec
@@ -38,6 +39,7 @@ def setOfWords2Vec(vocabList, inputSet):
             print(f'the word: {word} is not in the vocabulary')
     return returnVec
 
+
 @pysnooper.snoop()
 def trainNB0(trainMatrix, trainCategory):
     # $$p(c_{i}|w) = \frac{p(w|c_{i})p(c_{i})}{p(w)}$$
@@ -47,7 +49,8 @@ def trainNB0(trainMatrix, trainCategory):
     pAbusive = sum(trainCategory) / float(numTrainDocs)  # label为1占总数概率
     p0Num = np.zeros(numWords)
     p1Num = np.zeros(numWords)
-    p0Denom = 0.0; p1Denom = 0.0
+    p0Denom = 0.0
+    p1Denom = 0.0
 
     for i in range(numTrainDocs):
         if trainCategory[i] == 1:
@@ -59,6 +62,15 @@ def trainNB0(trainMatrix, trainCategory):
     p1Vect = p1Num / p1Denom  # 每个单词在该类别下出现的概率
     p0Vect = p0Num / p0Denom
     return p0Vect, p1Vect, pAbusive
+
+
+def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
+    p1 = sum(vec2Classify * p1Vec) + np.log(pClass1)
+    p0 = sum(vec2Classify * p0Vec) + np.log(1.0 - pClass1)
+    if p1 > p0:
+        return 1
+    else:
+        return 0
 
 
 if __name__ == "__main__":
